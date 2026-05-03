@@ -12,22 +12,33 @@ jobs:
           version: 4.2.1
           use-dotnet: false
           
-      - name: Install Android Build Template
+      - name: Setup Android SDK + Templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/4.2.1.stable
-          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
-          unzip -q Godot_v4.2.1-stable_export_templates.tpz
-          mv templates/* ~/.local/share/godot/export_templates/4.2.1.stable/
+          sudo apt-get update && sudo apt-get install -y wget unzip openjdk-17-jdk
           
-      - name: Setup Debug Keystore
-        run: |
+          # Debug keystore
           mkdir -p ~/.android
           keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           
+          # Export templates - correct path for CI
+          wget -q https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_export_templates.tpz
+          unzip -q Godot_v4.2.1-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/4.2.1.stable
+          mv templates/* ~/.local/share/godot/export_templates/4.2.1.stable/
+          
+          # Tell Godot where the keystore is
+          mkdir -p ~/.config/godot
+          echo 'export/android/debug_keystore = "~/.android/debug.keystore"' >> ~/.config/godot/editor_settings-4.tres
+          echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ~/.config/godot/editor_settings-4.tres
+          echo 'export/android/debug_keystore_pass = "android"' >> ~/.config/godot/editor_settings-4.tres
+          
+      - name: Import Project
+        run: godot --headless --import --quit || true
+        
       - name: Export APK
         run: |
           mkdir -p build/android
-          godot --headless --export-debug "Android" build/android/Odogwu_StormEater.apk
+          godot --headless --verbose --export-debug "Android" build/android/Odogwu_StormEater.apk
           
       - uses: actions/upload-artifact@v4
         with:
