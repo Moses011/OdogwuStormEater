@@ -1,2 +1,2 @@
 # OdogwuStormEater
-Odogwu: Storm Eater - Nigerian myth Boss Rush
+Odogwu: Storm Eater-Nigerian myth Boss Rush
