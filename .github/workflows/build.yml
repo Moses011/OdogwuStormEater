@@ -1,15 +1,23 @@
 name: Build Android APK
 on: [push, workflow_dispatch]
 jobs:
-  export:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: chickensoft-games/setup-godot@v1
+      
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
         with:
-          version: 4.3.0
-      - run: mkdir -p build/android
-      - run: godot --headless --export-release "Android" build/android/Odogwu_StormEater.apk
+          version: 4.2.1
+          use-dotnet: false
+          include-templates: true
+          
+      - name: Export APK
+        run: |
+          mkdir -p build/android
+          godot --headless --export-debug "Android" build/android/Odogwu_StormEater.apk
+          
       - uses: actions/upload-artifact@v4
         with:
           name: Odogwu_StormEater.apk
